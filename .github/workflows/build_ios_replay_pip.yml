@@ -7,6 +7,9 @@ on:
       - 'ios_aoi_replay_pip/**'
       - '.github/workflows/build_ios_replay_pip.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build-ipa:
     runs-on: macos-latest
@@ -26,8 +29,6 @@ jobs:
       - name: Build App & Broadcast Extension
         run: |
           cd ios_aoi_replay_pip
-          
-          # Build target without embedding validation lock
           xcodebuild -project AOIInstantReplay.xcodeproj \
             -scheme AOIInstantReplay \
             -configuration Release \
@@ -39,15 +40,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             VALIDATE_PRODUCT=NO \
             VALIDATE_EMBEDDED_BINARY=NO \
-            build > xcodebuild.log 2>&1 || {
-              echo "=== XCODEBUILD FAILED ==="
-              # Surface error lines directly as GitHub Actions check annotations
-              grep -E "error:" xcodebuild.log | while read -r err; do
-                echo "::error::$err"
-              done
-              tail -n 100 xcodebuild.log
-              exit 1
-            }
+            build
 
       - name: Package Ad-hoc IPA for TrollStore / Sideloadly
         run: |
@@ -68,16 +61,20 @@ jobs:
           zip -r -q AOIInstantReplay.ipa Payload
           ls -lh AOIInstantReplay.ipa
 
-      - name: Upload Build Log on Failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xcodebuild-failure-log
-          path: ios_aoi_replay_pip/xcodebuild.log
-
       - name: Upload IPA Artifact
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: AOIInstantReplay-iOS
           path: AOIInstantReplay.ipa
+
+      - name: Publish Direct IPA Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "AOI Instant Replay PiP iOS v1.0.0"
+          body: "Direct IPA release for TrollStore / Sideloadly / AltStore / Scarlet / Esign."
+          files: AOIInstantReplay.ipa
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
