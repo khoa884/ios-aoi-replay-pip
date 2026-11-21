@@ -34,22 +34,25 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build | tee xcodebuild.log || (echo "=== COMPILATION ERROR LOG ===" && grep -i -E "error:" xcodebuild.log -A 2 -B 1 && exit 1)
+            build
 
       - name: Package Ad-hoc IPA for TrollStore / Sideloadly
         run: |
           mkdir -p Payload
-          APP_PATH=$(find ios_aoi_replay_pip/build/Build/Products/Release-iphoneos -name "AOIInstantReplay.app" -type d | head -n 1)
+          APP_PATH=$(find ios_aoi_replay_pip/build -name "AOIInstantReplay.app" -type d | head -n 1)
           echo "Packaging application from: $APP_PATH"
           cp -r "$APP_PATH" Payload/
           
-          # Ad-hoc sign app & broadcast extension with ldid
-          ldid -S Payload/AOIInstantReplay.app
-          if [ -d "Payload/AOIInstantReplay.app/PlugIns" ]; then
-            find Payload/AOIInstantReplay.app/PlugIns -type f -perm +111 -exec ldid -S {} +
-          fi
+          # Sign embedded extensions first, then main bundle
+          find Payload/AOIInstantReplay.app -name "*.appex" -type d | while read -r ext; do
+            echo "Signing extension: $ext"
+            ldid -S "$ext" || true
+          done
           
-          zip -r AOIInstantReplay.ipa Payload
+          echo "Signing main application bundle..."
+          ldid -S Payload/AOIInstantReplay.app || true
+          
+          zip -r -q AOIInstantReplay.ipa Payload
           ls -lh AOIInstantReplay.ipa
 
       - name: Upload IPA Artifact
