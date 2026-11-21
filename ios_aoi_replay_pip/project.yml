@@ -8,12 +8,16 @@ options:
 settings:
   SWIFT_VERSION: 5.9
   TARGETED_DEVICE_FAMILY: 1,2
+  CODE_SIGN_IDENTITY: ""
+  CODE_SIGNING_REQUIRED: "NO"
+  CODE_SIGNING_ALLOWED: "NO"
 
 targets:
   AOIInstantReplay:
     type: application
     platform: iOS
     sources:
+      - path: AppDelegate.swift
       - path: MainViewController.swift
       - path: PiPReplayController.swift
       - path: CircularReplayBuffer.swift
