@@ -190,9 +190,9 @@ extension PiPReplayController: AVPictureInPictureSampleBufferPlaybackDelegate {
         // Handle floating window resize
     }
     
-    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completionHandler: @escaping () -> Void) {
+    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completion: @escaping () -> Void) {
         let seconds = CMTimeGetSeconds(skipInterval)
         triggerInstantReplay(seconds: abs(seconds) > 0 ? abs(seconds) : 15.0)
-        completionHandler()
+        completion()
     }
 }
