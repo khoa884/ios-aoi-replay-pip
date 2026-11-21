@@ -1,0 +1,57 @@
+name: Build iOS AOI Replay PiP IPA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ios_aoi_replay_pip/**'
+      - '.github/workflows/build_ios_replay_pip.yml'
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen & ldid
+        run: |
+          brew install xcodegen ldid
+
+      - name: Generate Xcode Project
+        run: |
+          cd ios_aoi_replay_pip
+          xcodegen generate
+
+      - name: Build and Archive
+        run: |
+          cd ios_aoi_replay_pip
+          xcodebuild -project AOIInstantReplay.xcodeproj \
+            -scheme AOIInstantReplay \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath ../build/AOIInstantReplay.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            archive
+
+      - name: Package Ad-hoc IPA for TrollStore / Sideloadly
+        run: |
+          mkdir -p Payload
+          cp -r build/AOIInstantReplay.xcarchive/Products/Applications/AOIInstantReplay.app Payload/
+          
+          # Ad-hoc sign app & broadcast extension with ldid
+          ldid -S Payload/AOIInstantReplay.app
+          if [ -d "Payload/AOIInstantReplay.app/PlugIns" ]; then
+            find Payload/AOIInstantReplay.app/PlugIns -type f -perm +111 -exec ldid -S {} +
+          fi
+          
+          zip -r AOIInstantReplay.ipa Payload
+          ls -lh AOIInstantReplay.ipa
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AOIInstantReplay-iOS
+          path: AOIInstantReplay.ipa
+          if-no-files-found: error

@@ -1,0 +1,37 @@
+name: Build iOS AoI Radar Dylib
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ios_aoi_radar/**'
+      - '.github/workflows/build_ios_dylib.yml'
+
+jobs:
+  build-arm64:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select active Xcode toolchain
+        run: xcode-select -p && xcrun --sdk iphoneos --show-sdk-path
+
+      - name: Build libaoi_radar.dylib (arm64)
+        run: make -C ios_aoi_radar clean all
+
+      - name: Ad-hoc sign with ldid for TrollStore / Sideloadly
+        run: |
+          if ! command -v ldid >/dev/null 2>&1; then
+            brew install ldid
+          fi
+          ldid -S ios_aoi_radar/libaoi_radar.dylib
+          file ios_aoi_radar/libaoi_radar.dylib
+          otool -L ios_aoi_radar/libaoi_radar.dylib
+
+      - name: Upload dylib artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libaoi_radar-ios-arm64
+          path: ios_aoi_radar/libaoi_radar.dylib
+          if-no-files-found: error

@@ -1,0 +1,41 @@
+name: AOIInstantReplay
+options:
+  bundleIdPrefix: com.aoi
+  deploymentTarget:
+    iOS: 15.0
+  xcodeVersion: 15.0
+
+settings:
+  SWIFT_VERSION: 5.9
+  TARGETED_DEVICE_FAMILY: 1,2
+
+targets:
+  AOIInstantReplay:
+    type: application
+    platform: iOS
+    sources:
+      - path: MainViewController.swift
+      - path: PiPReplayController.swift
+      - path: CircularReplayBuffer.swift
+    info:
+      path: Info.plist
+    dependencies:
+      - target: AOIBroadcastExtension
+    frameworks:
+      - sdk: AVKit.framework
+      - sdk: AVFoundation.framework
+      - sdk: ReplayKit.framework
+      - sdk: VideoToolbox.framework
+
+  AOIBroadcastExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: SampleHandler.swift
+      - path: CircularReplayBuffer.swift
+    info:
+      path: Extension-Info.plist
+    frameworks:
+      - sdk: ReplayKit.framework
+      - sdk: AVFoundation.framework
+      - sdk: VideoToolbox.framework

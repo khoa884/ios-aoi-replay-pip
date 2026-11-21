@@ -1,0 +1,15 @@
+# Binaries and large tools
+*.exe
+*.dll
+*.so
+*.dylib
+build/
+*.xcarchive
+Payload/
+*.ipa
+
+# System and logs
+*.xml
+*.png
+.DS_Store
+Thumbs.db
