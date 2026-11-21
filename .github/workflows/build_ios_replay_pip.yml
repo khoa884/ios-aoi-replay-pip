@@ -34,7 +34,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build
+            build | tee xcodebuild.log || (echo "=== COMPILATION ERROR LOG ===" && grep -i -E "error:" xcodebuild.log -A 2 -B 1 && exit 1)
 
       - name: Package Ad-hoc IPA for TrollStore / Sideloadly
         run: |

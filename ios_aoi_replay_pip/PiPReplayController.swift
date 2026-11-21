@@ -54,7 +54,6 @@ public final class PiPReplayController: NSObject {
         self.containerView = parentView
         sampleBufferDisplayLayer.frame = parentView.bounds
         sampleBufferDisplayLayer.videoGravity = .resizeAspectFill
-        sampleBufferDisplayLayer.preventsDisplaySleepDuringVideoPlayback = true
         parentView.layer.addSublayer(sampleBufferDisplayLayer)
         
         guard AVPictureInPictureController.isPictureInPictureSupported() else {
@@ -126,7 +125,6 @@ public final class PiPReplayController: NSObject {
         timer.setEventHandler { [weak self] in
             guard let self = self else { return }
             guard self.replayFrameIndex < self.replayFrames.count else {
-                // Loop or return to live
                 self.replayFrameIndex = 0
                 return
             }

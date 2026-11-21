@@ -16,6 +16,7 @@ targets:
   AOIInstantReplay:
     type: application
     platform: iOS
+    bundleId: com.aoi.instantreplay
     sources:
       - path: AppDelegate.swift
       - path: MainViewController.swift
@@ -29,11 +30,11 @@ targets:
       - sdk: AVKit.framework
       - sdk: AVFoundation.framework
       - sdk: ReplayKit.framework
-      - sdk: VideoToolbox.framework
 
   AOIBroadcastExtension:
     type: app-extension
     platform: iOS
+    bundleId: com.aoi.instantreplay.upload-extension
     sources:
       - path: SampleHandler.swift
       - path: CircularReplayBuffer.swift
@@ -42,4 +43,3 @@ targets:
     frameworks:
       - sdk: ReplayKit.framework
       - sdk: AVFoundation.framework
-      - sdk: VideoToolbox.framework
