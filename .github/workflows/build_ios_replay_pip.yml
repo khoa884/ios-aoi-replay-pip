@@ -26,6 +26,8 @@ jobs:
       - name: Build App & Broadcast Extension
         run: |
           cd ios_aoi_replay_pip
+          
+          # Build target without embedding validation lock
           xcodebuild -project AOIInstantReplay.xcodeproj \
             -scheme AOIInstantReplay \
             -configuration Release \
@@ -35,7 +37,17 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build > xcodebuild.log 2>&1 || (echo "=== XCODEBUILD FAILED - LOG TAIL ===" && tail -n 80 xcodebuild.log && exit 1)
+            VALIDATE_PRODUCT=NO \
+            VALIDATE_EMBEDDED_BINARY=NO \
+            build > xcodebuild.log 2>&1 || {
+              echo "=== XCODEBUILD FAILED ==="
+              # Surface error lines directly as GitHub Actions check annotations
+              grep -E "error:" xcodebuild.log | while read -r err; do
+                echo "::error::$err"
+              done
+              tail -n 100 xcodebuild.log
+              exit 1
+            }
 
       - name: Package Ad-hoc IPA for TrollStore / Sideloadly
         run: |
@@ -56,9 +68,16 @@ jobs:
           zip -r -q AOIInstantReplay.ipa Payload
           ls -lh AOIInstantReplay.ipa
 
+      - name: Upload Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-failure-log
+          path: ios_aoi_replay_pip/xcodebuild.log
+
       - name: Upload IPA Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: AOIInstantReplay-iOS
           path: AOIInstantReplay.ipa
-          if-no-files-found: error

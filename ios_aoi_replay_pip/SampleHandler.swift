@@ -4,6 +4,7 @@
 import ReplayKit
 import AVFoundation
 
+@objc(SampleHandler)
 public class SampleHandler: RPBroadcastSampleHandler {
     private let replayBuffer = CircularReplayBuffer.shared
     private let sharedDefaults = UserDefaults(suiteName: "group.com.aoi.instantreplay")
@@ -29,11 +30,9 @@ public class SampleHandler: RPBroadcastSampleHandler {
     public override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
         switch sampleBufferType {
         case .video:
-            // Feed zero-copy video frame directly to circular ring buffer
             replayBuffer.pushSampleBuffer(sampleBuffer)
             
         case .audioApp, .audioMic:
-            // Discard audio to save power & memory footprint during high-FPS MOBA gameplay
             break
             
         @unknown default:
