@@ -182,15 +182,15 @@ extension PiPReplayController: AVPictureInPictureSampleBufferPlaybackDelegate {
         return CMTimeRange(start: .zero, duration: duration)
     }
     
-    public func pictureInPictureControllerIsPlaybackLikelyToKeepUp(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
-        return true
+    public func pictureInPictureControllerIsPlaybackPaused(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
+        return replayTimer == nil
     }
     
     public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, didTransitionToRenderSize newRenderSize: CMVideoDimensions) {
         // Handle floating window resize
     }
     
-    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completion completionHandler: @escaping () -> Void) {
+    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completionHandler: @escaping () -> Void) {
         let seconds = CMTimeGetSeconds(skipInterval)
         triggerInstantReplay(seconds: abs(seconds) > 0 ? abs(seconds) : 15.0)
         completionHandler()
