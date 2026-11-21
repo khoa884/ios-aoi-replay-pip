@@ -31,10 +31,11 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build
+            build > xcodebuild.log 2>&1 || (echo "=== XCODEBUILD FAILED - LOG TAIL ===" && tail -n 80 xcodebuild.log && exit 1)
 
       - name: Package Ad-hoc IPA for TrollStore / Sideloadly
         run: |
